@@ -1,88 +1,93 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ProjectMars_OnboardingTask1.Pages
 {
     public class Login
     {
+        private readonly WebDriverWait _wait;
+
+        public Login(IWebDriver driver)
+        {
+            _wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+        }
+
+        /// <summary>
+        /// Enters credentials and clicks Login. Does NOT navigate or click Sign In —
+        /// those steps are handled separately in the feature flow.
+        /// </summary>
         public void LoginActions(IWebDriver driver, string username, string password)
         {
-            //Maximize the browser
-            driver.Manage().Window.Maximize();
+            // Enter the Username
+            IWebElement userNameField = _wait.Until(ExpectedConditions.ElementIsVisible(
+                By.XPath("/html/body/div[2]/div/div/div[1]/div/div[1]/input")));
+            userNameField.Clear();
+            userNameField.SendKeys(username);
 
-            //Launch the Url and navigate to Home page
-            driver.Navigate().GoToUrl("http://localhost:5000/");
-
-            // Click on Sign In
-            IWebElement SignButton = driver.FindElement(By.XPath("//*[@id=\"home\"]/div/div/div[1]/div/a"));
-            Thread.Sleep(1000);
-            SignButton.Click();
-
-            // Enter the Username and Password and Click on Login Button
-            IWebElement UserName = driver.FindElement(By.XPath("/html/body/div[2]/div/div/div[1]/div/div[1]/input"));
-            UserName.SendKeys(username);
-
-            IWebElement Password = driver.FindElement(By.XPath("/html/body/div[2]/div/div/div[1]/div/div[2]/input"));
-            Password.SendKeys(password);
-
-            IWebElement Loginbutton = driver.FindElement(By.XPath("/html/body/div[2]/div/div/div[1]/div/div[4]/button"));
-            Thread.Sleep(1000);
-            Loginbutton.Click();
+            // Enter the Password
+            IWebElement passwordField = driver.FindElement(
+                By.XPath("/html/body/div[2]/div/div/div[1]/div/div[2]/input"));
+            passwordField.Clear();
+            passwordField.SendKeys(password);
         }
 
         public void ClickSignInButton(IWebDriver driver)
         {
-            // Implement the logic to click on the Sign In button
-            IWebElement signInButton = driver.FindElement(By.XPath("//*[@id=\"home\"]/div/div/div[1]/div/a"));
+            IWebElement signInButton = _wait.Until(ExpectedConditions.ElementToBeClickable(
+                By.XPath("//*[@id=\"home\"]/div/div/div[1]/div/a")));
             signInButton.Click();
         }
 
         public bool IsSignInPageOpened(IWebDriver driver)
         {
-            // Implement the logic to check if the Sign In page is opened
-            IWebElement signInButton = driver.FindElement(By.XPath("//*[@id=\"home\"]/div/div/div[1]/div/a"));
-            return signInButton.Displayed;
+            try
+            {
+                IWebElement signInButton = _wait.Until(ExpectedConditions.ElementIsVisible(
+                    By.XPath("//*[@id=\"home\"]/div/div/div[1]/div/a")));
+                return signInButton.Displayed;
+            }
+            catch (WebDriverTimeoutException)
+            {
+                return false;
+            }
         }
 
         public void ClickLoginButton(IWebDriver driver)
         {
-            // Implement the logic to click on the Login button
-            IWebElement loginButton = driver.FindElement(By.XPath("/html/body/div[2]/div/div/div[1]/div/div[4]/button"));
+            IWebElement loginButton = _wait.Until(ExpectedConditions.ElementToBeClickable(
+                By.XPath("/html/body/div[2]/div/div/div[1]/div/div[4]/button")));
             loginButton.Click();
         }
 
         public bool IsProfilePageOpened(IWebDriver driver)
         {
-            // Implement the logic to check if the Profile page is opened
             try
             {
-                IWebElement profileElement = driver.FindElement(By.XPath("/*[@id=\"account-profile-section\"]/div/div[1]/div[2]/div/span"));
-                return true;
+                // FIX: was "/*[@id=..." (missing leading slash) — corrected to "//*[@id=..."
+                IWebElement profileElement = _wait.Until(ExpectedConditions.ElementIsVisible(
+                    By.XPath("//*[@id=\"account-profile-section\"]/div/div[1]/div[2]/div/span")));
+                return profileElement.Displayed;
             }
-            catch (NoSuchElementException)
+            catch (WebDriverTimeoutException)
             {
                 return false;
             }
         }
-
 
         public bool IsLoginPageOpened(IWebDriver driver)
         {
-            // Implement the logic to check if the Login page is opened
             try
             {
-                IWebElement loginElement = driver.FindElement(By.XPath("//*[@id=\"home\"]/div/div/div[1]/div/a"));
-                return true;
+                IWebElement loginElement = _wait.Until(ExpectedConditions.ElementIsVisible(
+                    By.XPath("//*[@id=\"home\"]/div/div/div[1]/div/a")));
+                return loginElement.Displayed;
             }
-            catch (NoSuchElementException)
+            catch (WebDriverTimeoutException)
             {
                 return false;
             }
         }
-
     }
 }

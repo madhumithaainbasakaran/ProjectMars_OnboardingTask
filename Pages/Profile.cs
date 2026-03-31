@@ -1,208 +1,195 @@
-﻿using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
 using System;
-using System.Threading;
+using System.Collections.Generic;
 
 namespace ProjectMars_OnboardingTask1.Pages
 {
     public class Profile
     {
-        // Language methods
+        private WebDriverWait GetWait(IWebDriver driver) =>
+            new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+
+        // ── Language methods ──────────────────────────────────────────────────
+
         public void CreateLanguage(IWebDriver driver, string language, string languageLevel)
         {
-            // Verify that the Language tab is displayed
-            Thread.Sleep(1000);
-            IWebElement languageTab = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[1]/a[1]"));
+            var wait = GetWait(driver);
+
+            // Verify Language tab is visible
+            IWebElement languageTab = wait.Until(ExpectedConditions.ElementIsVisible(
+                By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[1]/a[1]")));
             Assert.That(languageTab.Displayed);
 
-            // Click on the Add New button
-            Thread.Sleep(2000);
-            IWebElement addNewButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[2]/div/div[2]/div/table/thead/tr/th[3]/div"));
+            // Click Add New
+            IWebElement addNewButton = wait.Until(ExpectedConditions.ElementToBeClickable(
+                By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[2]/div/div[2]/div/table/thead/tr/th[3]/div")));
             addNewButton.Click();
-            Thread.Sleep(2000);
 
-            // Fill in language details
-            IWebElement addLanguage = driver.FindElement(By.Name("name"));
+            // Fill in language name
+            IWebElement addLanguage = wait.Until(ExpectedConditions.ElementIsVisible(By.Name("name")));
             addLanguage.SendKeys(language);
-            Thread.Sleep(2000);
 
+            // Select level from dropdown
             IWebElement addLanguageLevel = driver.FindElement(By.Name("level"));
-            SelectElement select = new SelectElement(addLanguageLevel);
-            select.SelectByText(languageLevel);
-            Thread.Sleep(2000);
+            new SelectElement(addLanguageLevel).SelectByText(languageLevel);
 
-            // Click on the Add button
-            IWebElement addButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[2]/div/div[2]/div/div/div[3]/input[1]"));
+            // Click Add
+            IWebElement addButton = wait.Until(ExpectedConditions.ElementToBeClickable(
+                By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[2]/div/div[2]/div/div/div[3]/input[1]")));
             addButton.Click();
         }
 
         public void VerifyLanguageAdded(IWebDriver driver, string language)
         {
-            // Verify that the language is added successfully
-            Thread.Sleep(1000);
-            IWebElement languageTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[2]/div/div[2]/div/table"));
-            Assert.IsTrue(languageTable.Text.Contains(language), $"Language '{language}' is not added successfully.");
+            var wait = GetWait(driver);
+            IWebElement languageTable = wait.Until(ExpectedConditions.ElementIsVisible(
+                By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[2]/div/div[2]/div/table")));
+            Assert.IsTrue(languageTable.Text.Contains(language),
+                $"Language '{language}' was not found in the language table.");
         }
 
         public void EditLanguage(IWebDriver driver, string language, string newLanguage)
         {
-            // Verify that the Language tab is displayed
-            Thread.Sleep(1000);
-            IWebElement languageTab = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[1]/a[1]"));
+            var wait = GetWait(driver);
+
+            IWebElement languageTab = wait.Until(ExpectedConditions.ElementIsVisible(
+                By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[1]/a[1]")));
             Assert.That(languageTab.Displayed);
 
-            // Click on the Edit button for the specified language
-            Thread.Sleep(2000);
             string tableValue = "#account-profile-section > div > section:nth-child(3) > div > div > div > div.eight.wide.column > form > div.ui.bottom.attached.tab.segment.active.tooltip-target > div > div.twelve.wide.column.scrollTable > div > table > tbody:nth-child(2) > tr > td.right.aligned > span:nth-child(1)";
-            IWebElement tableData = driver.FindElement(By.CssSelector(tableValue));
+            IWebElement tableData = wait.Until(ExpectedConditions.ElementToBeClickable(By.CssSelector(tableValue)));
             tableData.Click();
 
-            // Update the language name
-            IWebElement languageName = driver.FindElement(By.Name("name"));
+            IWebElement languageName = wait.Until(ExpectedConditions.ElementIsVisible(By.Name("name")));
             languageName.Clear();
             languageName.SendKeys(newLanguage);
 
-            Thread.Sleep(2000);
-            // Click on the Update button
-            IWebElement updateButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[2]/div/div[2]/div/table/tbody[1]/tr/td/div/span/input[1]"));
+            IWebElement updateButton = wait.Until(ExpectedConditions.ElementToBeClickable(
+                By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[2]/div/div[2]/div/table/tbody[1]/tr/td/div/span/input[1]")));
             updateButton.Click();
         }
 
         public void DeleteLanguage(IWebDriver driver, string language)
         {
-            // Verify that the Language tab is displayed
-            Thread.Sleep(1000);
-            IWebElement languageTab = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[1]/a[1]"));
+            var wait = GetWait(driver);
+
+            IWebElement languageTab = wait.Until(ExpectedConditions.ElementIsVisible(
+                By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[1]/a[1]")));
             Assert.That(languageTab.Displayed);
 
-            // Find the language to delete and click on the delete button
-            Thread.Sleep(1000);
-            IWebElement languageMainTable = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[2]/div/div[2]/div/table"));
-            var tableElements = languageMainTable.FindElements(By.TagName("tr"));
-            var tbRowCount = tableElements.Count;
-            if (tbRowCount > 1)
+            IWebElement languageMainTable = wait.Until(ExpectedConditions.ElementIsVisible(
+                By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[2]/div/div[2]/div/table")));
+
+            var rows = languageMainTable.FindElements(By.TagName("tr"));
+            if (rows.Count > 1)
             {
-                IWebElement deleteButton = driver.FindElement(By.XPath($"//td[contains(text(),'{language}')]/following-sibling::td/span[@class='remove ui icon button']"));
+                IWebElement deleteButton = driver.FindElement(
+                    By.XPath($"//td[contains(text(),'{language}')]/following-sibling::td/span[@class='remove ui icon button']"));
                 deleteButton.Click();
-                Thread.Sleep(1000);
             }
         }
 
-        // Skills methods
+        // ── Skills methods ────────────────────────────────────────────────────
+
         public void NavigateToSkillsTab(IWebDriver driver)
         {
-            // Navigate to the Skills tab
-            Thread.Sleep(1000);
-            IWebElement skillsTab = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[1]/a[2]"));
+            var wait = GetWait(driver);
+            IWebElement skillsTab = wait.Until(ExpectedConditions.ElementToBeClickable(
+                By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[1]/a[2]")));
             skillsTab.Click();
         }
 
-        public void CreateSkills(IWebDriver driver, string skills, string skillLevel)
+        /// <summary>
+        /// Fills in skill name + level and clicks Add. Assumes the Add New row is already open.
+        /// Does NOT re-click the Skills tab or Add New button.
+        /// </summary>
+        public void FillAndAddSkill(IWebDriver driver, string skill, string skillLevel)
         {
-            // Skills tab should be clicked
-            Thread.Sleep(1000);
-            IWebElement skillsTab = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[1]/a[2]"));
-            skillsTab.Click();
+            var wait = GetWait(driver);
 
-            // Click on the Add New button
-            IWebElement addNewButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[3]/div/div[2]/div/table/thead/tr/th[3]/div"));
-            addNewButton.Click();
-            Thread.Sleep(1000);
-
-            // Fill in skills details
-            IWebElement addSkills = driver.FindElement(By.Name("name"));
-            addSkills.SendKeys(skills);
+            IWebElement addSkills = wait.Until(ExpectedConditions.ElementIsVisible(By.Name("name")));
+            addSkills.Clear();
+            addSkills.SendKeys(skill);
 
             IWebElement addSkillsLevel = driver.FindElement(By.Name("level"));
-            addSkillsLevel.SendKeys(skillLevel);
+            new SelectElement(addSkillsLevel).SelectByText(skillLevel);
 
-            // Select skill level from dropdown
-            SelectElement select = new SelectElement(addSkillsLevel);
-            select.SelectByText(skillLevel);
-            Thread.Sleep(1000);
-
-            // Click on the Add button
-            IWebElement addButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[3]/div/div[2]/div/div/span/input[1]"));
+            IWebElement addButton = wait.Until(ExpectedConditions.ElementToBeClickable(
+                By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[3]/div/div[2]/div/div/span/input[1]")));
             addButton.Click();
+        }
+
+        /// <summary>
+        /// Full helper: navigates to Skills tab, opens Add New, fills skill, and clicks Add.
+        /// Use only for single-skill scenarios.
+        /// </summary>
+        public void CreateSkills(IWebDriver driver, string skill, string skillLevel)
+        {
+            NavigateToSkillsTab(driver);
+            ClickAddNewButton(driver);
+            FillAndAddSkill(driver, skill, skillLevel);
         }
 
         public void EditSkills(IWebDriver driver, string oldSkill, string oldLevel, string newSkill, string newLevel)
         {
-            // Skills tab should be clicked
-            Thread.Sleep(1000);
-            IWebElement skillsTab = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[1]/a[2]"));
-            skillsTab.Click();
+            var wait = GetWait(driver);
+            NavigateToSkillsTab(driver);
 
-            // Click on the Edit button for the specified skills
-            Thread.Sleep(1000);
             string tableValue = "#account-profile-section > div > section:nth-child(3) > div > div > div > div.eight.wide.column > form > div.ui.bottom.attached.tab.segment.active.tooltip-target > div > div.twelve.wide.column.scrollTable > div > table > tbody:nth-child(2) > tr > td.right.aligned > span:nth-child(1)";
-            IWebElement tableData = driver.FindElement(By.CssSelector(tableValue));
+            IWebElement tableData = wait.Until(ExpectedConditions.ElementToBeClickable(By.CssSelector(tableValue)));
             tableData.Click();
 
-            // Update the skill name
-            IWebElement skillName = driver.FindElement(By.Name("name"));
+            IWebElement skillName = wait.Until(ExpectedConditions.ElementIsVisible(By.Name("name")));
             skillName.Clear();
             skillName.SendKeys(newSkill + Keys.Tab);
 
-            // Update the skill level
-            IWebElement skillLevel = driver.FindElement(By.Name("level"));
-            skillLevel.Clear();
-            skillLevel.SendKeys(newLevel + Keys.Tab);
+            IWebElement skillLevel_el = driver.FindElement(By.Name("level"));
+            skillLevel_el.Clear();
+            skillLevel_el.SendKeys(newLevel + Keys.Tab);
 
-            // Click on the Update button
-            Thread.Sleep(2000);
-            IWebElement updateButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[3]/div/div[2]/div/table/tbody[1]/tr/td/div/span/input[1]"));
+            IWebElement updateButton = wait.Until(ExpectedConditions.ElementToBeClickable(
+                By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[3]/div/div[2]/div/table/tbody[1]/tr/td/div/span/input[1]")));
             updateButton.Click();
         }
 
-        public void DeleteSkills(IWebDriver driver, string skills, string level)
+        public void DeleteSkills(IWebDriver driver, string skill, string level)
         {
-            // Skills tab should be clicked
-            Thread.Sleep(1000);
-            IWebElement skillsTab = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[1]/a[2]"));
-            skillsTab.Click();
+            var wait = GetWait(driver);
+            NavigateToSkillsTab(driver);
 
-            // Find the skills to delete and click on the delete button
-            Thread.Sleep(1000);
-            IWebElement deleteButton = driver.FindElement(By.XPath($"//td[contains(text(),'{skills}')]/following-sibling::td/span[@class='remove ui icon button']"));
+            IWebElement deleteButton = wait.Until(ExpectedConditions.ElementToBeClickable(
+                By.XPath($"//td[contains(text(),'{skill}')]/following-sibling::td/span[@class='remove ui icon button']")));
             deleteButton.Click();
-            Thread.Sleep(1000);
         }
 
         public void ClickAddNewButton(IWebDriver driver)
         {
-            // Click on the Add New button
-            IWebElement addNewButton = driver.FindElement(By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[3]/div/div[2]/div/table/thead/tr/th[3]/div"));
+            var wait = GetWait(driver);
+            IWebElement addNewButton = wait.Until(ExpectedConditions.ElementToBeClickable(
+                By.XPath("//*[@id=\"account-profile-section\"]/div/section[2]/div/div/div/div[3]/form/div[3]/div/div[2]/div/table/thead/tr/th[3]/div")));
             addNewButton.Click();
-            Thread.Sleep(1000);
         }
 
         public void ClickAddButton(IWebDriver driver)
         {
-            // Click on the Add button
-            IWebElement addButton = driver.FindElement(By.XPath("//input[@value='Add']"));
+            var wait = GetWait(driver);
+            IWebElement addButton = wait.Until(ExpectedConditions.ElementToBeClickable(
+                By.XPath("//input[@value='Add']")));
             addButton.Click();
-            Thread.Sleep(1000);
         }
 
         public bool IsSkillAdded(IWebDriver driver, string skill, string level)
         {
-            // Implement logic to verify if the skill with the specified level is added
-            IWebElement skillElement = driver.FindElement(By.XPath($"//input[@name='name'][@value='{skill}']"));
-            IWebElement levelElement = driver.FindElement(By.XPath("//select[@name='level']"));
-
-            return skillElement != null && levelElement != null;
-        }
-
-        public bool IsSkillDeletedMessageDisplayed(IWebDriver driver, string message)
-        {
-            // Implement logic to verify if the deletion message is displayed
+            // FIX: original logic searched for input[@value='{skill}'] which only works
+            // in edit-mode. Instead verify the skill row exists in the table.
             try
             {
-                IWebElement messageElement = driver.FindElement(By.XPath("//div[@class='ns-box-inner']"));
-                return messageElement != null && messageElement.Displayed;
+                IWebElement skillRow = driver.FindElement(
+                    By.XPath($"//td[normalize-space(text())='{skill}']"));
+                return skillRow.Displayed;
             }
             catch (NoSuchElementException)
             {
@@ -210,80 +197,45 @@ namespace ProjectMars_OnboardingTask1.Pages
             }
         }
 
-
-        public bool AreMultipleSkillsAdded(IWebDriver driver)
+        public bool IsNotificationMessageDisplayed(IWebDriver driver, string expectedMessage)
         {
-            // Implement logic to check if multiple skills are added successfully
+            // Shared helper: checks the notification banner text matches the expected message
             try
             {
-                // Use a list of expected skills to check against the actual skills displayed
-                List<string> expectedSkills = new List<string> { "Skill1", "Skill2", "Skill3" };
-
-                foreach (string skill in expectedSkills)
-                {
-                    IWebElement skillElement = driver.FindElement(By.XPath("//div[@data-tab='second']//table/tbody[last()]/tr/td[1]"));
-                    if (!skillElement.Displayed)
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
+                var wait = GetWait(driver);
+                IWebElement messageElement = wait.Until(ExpectedConditions.ElementIsVisible(
+                    By.XPath("//div[@class='ns-box-inner']")));
+                return messageElement.Displayed && messageElement.Text.Contains(expectedMessage);
             }
-            catch (NoSuchElementException)
+            catch (WebDriverTimeoutException)
             {
                 return false;
             }
         }
 
+        // Keep individual named wrappers for readability in step definitions
+        public bool IsSkillDeletedMessageDisplayed(IWebDriver driver, string message) =>
+            IsNotificationMessageDisplayed(driver, message);
 
-        public bool IsErrorMessageDisplayed(IWebDriver driver, string errorMessage)
+        public bool IsErrorMessageDisplayed(IWebDriver driver, string errorMessage) =>
+            IsNotificationMessageDisplayed(driver, errorMessage);
+
+        public bool IsDuplicateDataErrorMessageDisplayed(IWebDriver driver, string errorMessage) =>
+            IsNotificationMessageDisplayed(driver, errorMessage);
+
+        public bool IsSkillUpdatedMessageDisplayed(IWebDriver driver, string message) =>
+            IsNotificationMessageDisplayed(driver, message);
+
+        public bool AreMultipleSkillsAdded(IWebDriver driver, List<string> expectedSkills)
         {
-            try
+            // FIX: original used hardcoded dummy list {"Skill1","Skill2","Skill3"}.
+            // Now accepts the actual expected list and verifies each skill row exists.
+            foreach (string skill in expectedSkills)
             {
-                // Find the error message element on the page
-                IWebElement errorMessageElement = driver.FindElement(By.XPath("//div[@class='ns-box-inner']"));
-
-                // Check if the error message element is displayed
-                return errorMessageElement.Displayed;
+                if (!IsSkillAdded(driver, skill, ""))
+                    return false;
             }
-            catch (NoSuchElementException)
-            {
-                // If the error message element is not found, return false
-                return false;
-            }
+            return true;
         }
-
-        public bool IsDuplicateDataErrorMessageDisplayed(IWebDriver driver, string errorMessage)
-        {
-            try
-            {
-                // Find the error message element on the page
-                IWebElement errorMessageElement = driver.FindElement(By.XPath("//div[@class='ns-box-inner']"));
-
-                // Check if the error message element is displayed
-                return errorMessageElement.Displayed;
-            }
-            catch (NoSuchElementException)
-            {
-                // If the error message element is not found, return false
-                return false;
-            }
-        }
-
-        public bool IsSkillUpdatedMessageDisplayed(IWebDriver driver, string message)
-        {
-            // Check if the skill updated message is displayed
-            try
-            {
-                IWebElement messageElement = driver.FindElement(By.XPath("//div[@class='ns-box-inner']"));
-                return messageElement.Displayed;
-            }
-            catch (NoSuchElementException)
-            {
-                return false;
-            }
-        }
-
     }
 }
